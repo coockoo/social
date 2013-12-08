@@ -25,6 +25,7 @@ public class User implements Serializable{
     
     public User(int userID, String firstName, String lastName, String sex, Date birthdate, String email, String nickName,
     		String password) {
+    	System.out.println("Im here!");
         this.userID = userID;
         this.firstName = firstName;
         this.lastName = lastName;

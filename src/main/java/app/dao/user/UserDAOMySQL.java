@@ -1,10 +1,13 @@
 package app.dao.user;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +23,17 @@ public class UserDAOMySQL implements UserDAO {
 	public User create(User user) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		java.sql.Date userBirthdate = new Date(user.getBirthDate().getYear(), user.getBirthDate().getMonth(), user.getBirthDate().getDay());
+		String dateString = "2001/03/09";
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/mm/dd");
+		java.util.Date convertedDate = null;
+		try {
+			convertedDate = dateFormat.parse(dateString);
+		} catch (ParseException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} 
+		//java.sql.Date userBirthdate = new Date(convertedDate.getYear(), convertedDate.getMonth(), convertedDate.getDay());
 		try {
 			connection = dataSource.getConnection();
 			stmt = connection.prepareStatement("INSERT INTO Users "
@@ -29,7 +43,7 @@ public class UserDAOMySQL implements UserDAO {
 			stmt.setString(2, user.getLastName());
 			stmt.setString(3, user.getNickName());
 			stmt.setString(4, user.getSex());
-			stmt.setDate(5, (java.sql.Date) user.getBirthDate());
+			stmt.setDate(5, userBirthdate);
 			stmt.setString(6, user.getEmail());
 			stmt.setString(7, user.getPassword());
 			stmt.execute();
