@@ -13,6 +13,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import com.google.gson.Gson;
+
 public class UserDAOMySQL implements UserDAO {
 
 	private DataSource dataSource;
@@ -24,21 +26,11 @@ public class UserDAOMySQL implements UserDAO {
 		Connection connection = null;
 		PreparedStatement stmt = null;
 		java.sql.Date userBirthdate = new Date(user.getBirthDate().getYear(), user.getBirthDate().getMonth(), user.getBirthDate().getDay());
-		String dateString = "2001/03/09";
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/mm/dd");
-		java.util.Date convertedDate = null;
-		try {
-			convertedDate = dateFormat.parse(dateString);
-		} catch (ParseException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} 
-		//java.sql.Date userBirthdate = new Date(convertedDate.getYear(), convertedDate.getMonth(), convertedDate.getDay());
 		try {
 			connection = dataSource.getConnection();
 			stmt = connection.prepareStatement("INSERT INTO Users "
-									+ "(firstname, lastname, nickname, sex, birthdate, email, password) "
-									+ "VALUES (?, ?, ?, ?, ?, ?, ?)");
+									+ "(firstname, lastname, nickname, sex, birthdate, email, password, rate) "
+									+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 			stmt.setString(1, user.getFirstName());
 			stmt.setString(2, user.getLastName());
 			stmt.setString(3, user.getNickName());
@@ -46,6 +38,7 @@ public class UserDAOMySQL implements UserDAO {
 			stmt.setDate(5, userBirthdate);
 			stmt.setString(6, user.getEmail());
 			stmt.setString(7, user.getPassword());
+			stmt.setInt(8, user.getRate());
 			stmt.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -75,20 +68,30 @@ public class UserDAOMySQL implements UserDAO {
 		return user;
 	}
 
-	public boolean update(User user) {
+	public boolean update(int id, User user) {
+		System.out.println(new Gson().toJson(user));
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		java.sql.Date userBirthdate = new Date(user.getBirthDate().getYear(), user.getBirthDate().getMonth(), user.getBirthDate().getDay());
 		try {
 			connection = dataSource.getConnection();
-			stmt = connection.prepareStatement("UPDATE Users SET firstname=?, lastname=?, nickname=?, sex=?, birthdate=?, email=?, password=? WHERE userID=?");
+			stmt = connection.prepareStatement("UPDATE Users SET "
+					+ "firstname = COALESCE(?, firstname), "
+					+ "lastname = COALESCE(?, lastname), "
+					+ "nickname = COALESCE(?, nickname), "
+					+ "sex = COALESCE(?, sex), "
+					+ "birthdate = COALESCE(?, birthdate), "
+					+ "email = COALESCE(?, email), "
+					+ "password = COALESCE(?, password) "
+					+ "WHERE userID=?");
 			stmt.setString(1, user.getFirstName());
 			stmt.setString(2, user.getLastName());
 			stmt.setString(3, user.getNickName());
 			stmt.setString(4, user.getSex());
-			stmt.setDate(5, (java.sql.Date) user.getBirthDate());
+			stmt.setDate(5, userBirthdate);
 			stmt.setString(6, user.getEmail());
 			stmt.setString(7, user.getPassword());
-			stmt.setInt(8, user.getUserID());
+			stmt.setInt(8, id);
 			stmt.execute();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -100,13 +103,16 @@ public class UserDAOMySQL implements UserDAO {
 	public boolean delete(User user) {
 		Connection connection = null;
 		PreparedStatement stmt = null;
+		if (user == null) {
+			return false;
+		}
 		try {
 			connection = dataSource.getConnection();
 			stmt = connection.prepareStatement("DELETE FROM Users WHERE userID=?");
 			stmt.setInt(1, user.getUserID());
 			stmt.execute();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 			return false;
 		}
 		return true;
