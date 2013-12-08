@@ -6,4 +6,5 @@
     <import resource="spring-datasource.xml"/>
     <import resource="spring-user.xml"/>
 	<import resource="spring-group.xml"/>
+	<import resource="spring-message.xml"/>
 </beans>
