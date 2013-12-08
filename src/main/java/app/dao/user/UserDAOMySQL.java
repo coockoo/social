@@ -13,6 +13,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import app.dao.group.Group;
+
 import com.google.gson.Gson;
 
 public class UserDAOMySQL implements UserDAO {
@@ -66,8 +68,8 @@ public class UserDAOMySQL implements UserDAO {
 			return null;
 		}
 		return user;
+		
 	}
-
 	public boolean update(int id, User user) {
 		System.out.println(new Gson().toJson(user));
 		Connection connection = null;
@@ -136,5 +138,50 @@ public class UserDAOMySQL implements UserDAO {
 			return null;
 		}
 		return users;
+	}
+
+	public boolean enrollToGroup(int userID, int groupID) {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		if (findUserById(userID) == null) {
+			return false;
+		}
+		try {
+			connection = dataSource.getConnection();
+			statement = connection.prepareStatement("INSERT INTO Userstogroups (userID, groupID) values (?,?);");
+			statement.setInt(1, userID);
+			statement.setInt(2, groupID);
+			statement.execute();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return false;
+		}
+
+		return true;
+	}
+
+	public List<Group> getGroups(User user) {
+		Connection connection = null;
+		PreparedStatement statement = null;
+		ResultSet resultSet;
+		List<Group> groups = new ArrayList<Group>();
+		if (user == null) {
+			return null;
+		}
+		try {
+			connection = dataSource.getConnection();
+			statement = connection.prepareStatement("SELECT * FROM Userstogroups WHERE userID=?");
+			statement.setInt(1, user.getUserID());
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				Group group = new Group(resultSet);
+				groups.add(group);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+
+		return groups;
 	}
 }

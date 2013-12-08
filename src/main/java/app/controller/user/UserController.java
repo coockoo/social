@@ -110,4 +110,16 @@ public class UserController {
 		responseHeaders.set("Content-Type", "application/json");
 		return new ResponseEntity<String>("{\"success\": " + userDAO.delete(userDAO.findUserById(id)) + "}", responseHeaders, HttpStatus.OK);
 	}
+	@RequestMapping(value="/{userID}/enroll/{groupID}", method=RequestMethod.POST)
+	ResponseEntity<String> enrollToGroup(@PathVariable(value = "userID") int userID, @PathVariable(value = "groupID") int groupID) {
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Content-Type", "application/json");
+		return new ResponseEntity<String>("{\"success\": " + userDAO.enrollToGroup(userID, groupID) + "}", responseHeaders, HttpStatus.OK);
+	}
+	@RequestMapping(value="/{userID}/groups", method=RequestMethod.GET)
+	ResponseEntity<String> getGroups(@PathVariable(value = "userID") int userID) {
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Content-Type", "application/json");
+		return new ResponseEntity<String>(new Gson().toJson(userDAO.getGroups(userDAO.findUserById(userID))), responseHeaders, HttpStatus.OK);
+	}
 }
