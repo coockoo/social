@@ -78,7 +78,7 @@ public class GroupController {
 		}
 	}
 	
-	@RequestMapping( value = "/{groupID}/messages", method = RequestMethod.POST) 
+	@RequestMapping( value = "/{groupID}/messages", method = RequestMethod.GET) 
 	public @ResponseBody
 	ResponseEntity<String> allMessages(@PathVariable(value = "groupID") int groupID) {
 		HttpHeaders responseHeaders = new HttpHeaders();

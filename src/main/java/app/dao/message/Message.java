@@ -1,5 +1,7 @@
 package app.dao.message;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 import app.dao.group.Group;
