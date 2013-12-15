@@ -20,12 +20,6 @@ public class GroupDAOMySQL implements GroupDAO {
 	public void setDataSource(DataSource dataSource) {
 		this.dataSource = dataSource;
 	}
-	
-	public List<Group> selectGroupsOfUser(int ID)
-			throws ClassNotFoundException, SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	public List<Group> getAllGroups() {
 		Connection connection = null;
@@ -116,5 +110,36 @@ public class GroupDAOMySQL implements GroupDAO {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public List<User> getUsersOfGroup(int groupID) {
+		// TODO Auto-generated method stub
+		List<User> users = new ArrayList<User>();
+		Connection connection = null;
+		try {
+			connection = dataSource.getConnection();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		PreparedStatement stmt1 = null;
+		ResultSet rs1 = null;
+		try {
+			stmt1 = connection.prepareStatement("Select * from Users where userID in (select userID from Userstogroups where groupID = ?);");
+			stmt1.setInt(1, groupID);
+			rs1 = stmt1.executeQuery();
+			    while (rs1.next()) {
+			        User user = new User(rs1);
+			        users.add(user);
+			    } 
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return users;
+	}
+	
+	
+
 
 }

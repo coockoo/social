@@ -67,8 +67,7 @@ public class UserDAOMySQL implements UserDAO {
 			e.printStackTrace();
 			return null;
 		}
-		return user;
-		
+		return user;	
 	}
 	public boolean update(int id, User user) {
 		System.out.println(new Gson().toJson(user));
@@ -183,5 +182,26 @@ public class UserDAOMySQL implements UserDAO {
 		}
 
 		return groups;
+	}
+
+	public User getUserByCredentials(String login, String password) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet resultSet = null;
+		User user = null;
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM Users WHERE nickName=? AND password=?");
+			stmt.setString(1, login);
+			stmt.setString(2, password);
+			resultSet = stmt.executeQuery();
+			while(resultSet.next()) {
+				user = new User(resultSet);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return user;	
 	}
 }

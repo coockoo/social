@@ -5,6 +5,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +23,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import app.UserSession;
 import app.dao.user.User;
 import app.dao.user.UserDAO;
 
@@ -29,6 +32,7 @@ import app.dao.user.UserDAO;
 public class UserController {
 	private ApplicationContext context = null;
 	private UserDAO userDAO = null;
+	private UserSession session = null;
 	private User byJSON(String json) {
 		JsonParser jsonParser = new JsonParser();
 		JsonObject jo = (JsonObject) jsonParser.parse(json);
@@ -37,7 +41,7 @@ public class UserController {
 		String anoth = dateStr.substring(1, dateStr.length() - 1);
 
 		SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-mm-dd");
-		String dateInString = anoth;// "31-08-1982";
+		String dateInString = anoth;
 		Date date = null;
 		try {
 			date = sdf1.parse(dateInString);
@@ -60,34 +64,48 @@ public class UserController {
 	public UserController() {
 		context = new ClassPathXmlApplicationContext("application-context.xml");
 		userDAO = (UserDAO) context.getBean("userDAO");
+		session = (UserSession) context.getBean("userSession");
 	}
 
 	@RequestMapping(value = "/all", method = RequestMethod.GET)
 	public @ResponseBody
-	ResponseEntity<String> allUsers() {
+	ResponseEntity<String> allUsers(HttpServletRequest request) {
 		List<User> users = userDAO.getAllUsers();
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
+		System.out.println("Session " + request.getSession(false));
+		
 		return new ResponseEntity<String>(new Gson().toJson(users),
 				responseHeaders, HttpStatus.OK);
+	}
+	
+	@RequestMapping(value = "/error")
+	public @ResponseBody
+	ResponseEntity<String> error(HttpServletRequest request) {
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Content-Type", "application/json");
+		return new ResponseEntity<String>("error", responseHeaders, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public @ResponseBody
-	ResponseEntity<String> showUser(@PathVariable(value = "id") int id) {
+	ResponseEntity<String> showUser(@PathVariable(value = "id") int id, HttpServletRequest request) {
 		User user = userDAO.findUserById(id);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
+		System.out.println(session.getUser());
 		return new ResponseEntity<String>(new Gson().toJson(user),
 				responseHeaders, HttpStatus.OK);
 	}
 
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	ResponseEntity<String> createUser(@RequestBody String json) {
+	ResponseEntity<String> createUser(@RequestBody String json, HttpServletRequest request) {
 		User user = byJSON(json);
 		user = userDAO.create(user);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
+		//request.getSession().setAttribute("user", user);
+		
 		return new ResponseEntity<String>(new Gson().toJson(user),
 				responseHeaders, HttpStatus.OK);
 	}
@@ -104,18 +122,21 @@ public class UserController {
 			return null;
 		}
 	}
+	
 	@RequestMapping(value="/{id}", method=RequestMethod.DELETE)
 	ResponseEntity<String> deleteUser(@PathVariable(value = "id") int id) {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
 		return new ResponseEntity<String>("{\"success\": " + userDAO.delete(userDAO.findUserById(id)) + "}", responseHeaders, HttpStatus.OK);
 	}
+	
 	@RequestMapping(value="/{userID}/enroll/{groupID}", method=RequestMethod.POST)
 	ResponseEntity<String> enrollToGroup(@PathVariable(value = "userID") int userID, @PathVariable(value = "groupID") int groupID) {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
 		return new ResponseEntity<String>("{\"success\": " + userDAO.enrollToGroup(userID, groupID) + "}", responseHeaders, HttpStatus.OK);
 	}
+	
 	@RequestMapping(value="/{userID}/groups", method=RequestMethod.GET)
 	ResponseEntity<String> getGroups(@PathVariable(value = "userID") int userID) {
 		HttpHeaders responseHeaders = new HttpHeaders();

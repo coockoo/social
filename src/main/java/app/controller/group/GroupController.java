@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -85,6 +86,17 @@ public class GroupController {
 		responseHeaders.set("Content-Type", "application/json");
 		List<Message> messages = messageDAO.getAllMessagesOfGroup(groupID);
 		return new ResponseEntity<String>(new Gson().toJson(messages),
+				responseHeaders, HttpStatus.OK);
+	}
+	
+	
+	@RequestMapping( value = "/{groupID}/users", method = RequestMethod.GET) 
+	public @ResponseBody
+	ResponseEntity<String> usersOfTheGroup(@PathVariable(value = "groupID") int groupID) {
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Content-Type", "application/json");
+		List<User> users = groupDAO.getUsersOfGroup(groupID);
+		return new ResponseEntity<String>(new Gson().toJson(users),
 				responseHeaders, HttpStatus.OK);
 	}
 

@@ -10,4 +10,5 @@ public interface GroupDAO {
 	public List<Group> getAllGroups();
 	public Group findGroupById(int id);
 	public boolean isGroupOfUser(int userID, int groupID);
+	public List<User> getUsersOfGroup(int groupID);
 }
