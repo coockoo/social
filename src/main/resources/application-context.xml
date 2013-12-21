@@ -8,7 +8,9 @@
 	<import resource="spring-group.xml"/>
 	<import resource="spring-message.xml"/>
 	<import resource="spring-session.xml"/>
+	<!-- 
+	<bean id="authenticationFilter" class="app.AuthenticationFilter"></bean> -->
+	<bean id="customUserDetailsService" class="app.service.CustomUserDetailsService" />
+	<bean id="counterService" class="app.service.CounterService" />
 	
-	<bean id="authenticationFilter" class="app.AuthenticationFilter">
-	</bean>
 </beans>

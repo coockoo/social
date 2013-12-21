@@ -13,4 +13,5 @@ public interface UserDAO {
     public boolean enrollToGroup (int userID, int groupID);
     public List<Group> getGroups (User user);
     public User getUserByCredentials(String login, String password);
+    public User getUserByLogin(String login);
 }

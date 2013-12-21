@@ -6,12 +6,17 @@ import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -87,16 +92,24 @@ public class UserController {
 		return new ResponseEntity<String>("error", responseHeaders, HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+/*	@RequestMapping(value = "/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
 	public @ResponseBody
-	ResponseEntity<String> showUser(@PathVariable(value = "id") int id, HttpServletRequest request) {
+	ResponseEntity<String> showUser(@PathVariable(value = "id") int id, HttpServletRequest request, HttpSession session) {
+		System.out.println("User by id: " + session);
+		SecurityContext securityContext = SecurityContextHolder.getContext();
+	    Authentication authentication = securityContext.getAuthentication();
+	    if (authentication != null) {
+	        Object principal = authentication.getPrincipal();
+	        System.out.println("AuthUser: ");
+	        System.out.print(principal instanceof UserDetails ? principal : null);
+	    }
+		System.out.println("In user/id");
 		User user = userDAO.findUserById(id);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
-		System.out.println(session.getUser());
 		return new ResponseEntity<String>(new Gson().toJson(user),
 				responseHeaders, HttpStatus.OK);
-	}
+	}*/
 
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
 	ResponseEntity<String> createUser(@RequestBody String json, HttpServletRequest request) {

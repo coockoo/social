@@ -44,7 +44,8 @@ public class User implements Serializable{
         setSex(userResultSet.getString(5));
         setBirthDate(userResultSet.getDate(6));
         setEmail(userResultSet.getString(7)); 
-        setPassword(userResultSet.getString(8));
+        setRate(userResultSet.getInt(8));
+        setPassword(userResultSet.getString(9));
     }
     
     public int getUserID() {

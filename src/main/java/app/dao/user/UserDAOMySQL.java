@@ -204,4 +204,24 @@ public class UserDAOMySQL implements UserDAO {
 		}
 		return user;	
 	}
+
+	public User getUserByLogin(String login) {
+		Connection connection = null;
+		PreparedStatement stmt = null;
+		ResultSet resultSet = null;
+		User user = null;
+		try {
+			connection = dataSource.getConnection();
+			stmt = connection.prepareStatement("SELECT * FROM Users WHERE nickName=?");
+			stmt.setString(1, login);
+			resultSet = stmt.executeQuery();
+			while(resultSet.next()) {
+				user = new User(resultSet);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+		return user;
+	}
 }
