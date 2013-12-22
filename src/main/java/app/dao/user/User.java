@@ -2,25 +2,55 @@ package app.dao.user;
 
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+
+import app.dao.group.Group;
+import app.dao.message.Message;
+
+@Entity
+@Table(name = "Users")
 public class User implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer userID = null;
     private String firstName = null;
     private String lastName = null;
     private String nickName = null;
     private String sex = null;
+    
+    @Temporal(value = TemporalType.DATE)
     private Date birthdate = null;
+    
     private String email= null;
     private Integer rate = 0;
     private String password = null;
+    private transient Set<Group> groups = null;
+    private transient Set<Message> messages = null;
     //TODO list of Users-friends
     
-    public User() {
+    /*public User() {
     }
     
     public User(int userID, String firstName, String lastName, String sex, Date birthdate, String email, String nickName,
@@ -46,13 +76,13 @@ public class User implements Serializable{
         setEmail(userResultSet.getString(7)); 
         setRate(userResultSet.getInt(8));
         setPassword(userResultSet.getString(9));
-    }
+    }*/
     
-    public int getUserID() {
+    public Integer getUserID() {
         return userID;
     }
     
-    public void setUserID(int userID) {
+    public void setUserID(Integer userID) {
         this.userID = userID;
     }
     
@@ -106,7 +136,7 @@ public class User implements Serializable{
     }
     
         
-    public int getRate() {
+    public Integer getRate() {
         return rate;
     }
     
@@ -122,9 +152,29 @@ public class User implements Serializable{
         this.password = password;
     }
     
+    
+    @ManyToMany(mappedBy = "usersList", fetch = FetchType.EAGER)
+    //@LazyCollection(LazyCollectionOption.FALSE)
+    public Set<Group> getGroups() {
+    	return this.groups;
+    }
+    
+    public void setGroups(Set<Group> groups) {
+    	this.groups = groups;
+    }
+    
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    public Set<Message> getMessages() {
+    	return this.messages;
+    }
+    
+    public void setMessages(Set<Message> messages) {
+    	this.messages = messages;
+    }
+    
     @Override
     public String toString() {
-        return firstName;
+        return this.getFirstName() + " : " + this.getLastName() + " : " + this.getUserID();
     }
 
 }

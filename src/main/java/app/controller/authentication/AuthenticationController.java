@@ -43,8 +43,8 @@ public class AuthenticationController {
 	@Qualifier("authenticationManager")
 	protected AuthenticationManager authenticationManager;
 	
-	@Autowired
-	protected HttpServletRequest request;
+	/*@Autowired
+	protected HttpServletRequest request;*/
 	
 	private ApplicationContext context = null;
 	private UserDAO userDAO = null;
@@ -54,12 +54,10 @@ public class AuthenticationController {
 		userDAO = (UserDAO) context.getBean("userDAO");
 	}
 	
-	@RequestMapping(value = "/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
+/*	@RequestMapping(value = "/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
 	public @ResponseBody
 	ResponseEntity<String> showUser(@PathVariable(value = "id") int id) {
 		
-		HttpSession session = request.getSession(false);
-		System.out.println("session in id: " + session);
 		SecurityContext securityContext = SecurityContextHolder.getContext();
 	    Authentication authentication = securityContext.getAuthentication();
 	    if (authentication != null) {
@@ -72,41 +70,41 @@ public class AuthenticationController {
 		responseHeaders.set("Content-Type", "application/json");
 		return new ResponseEntity<String>(new Gson().toJson(user),
 				responseHeaders, HttpStatus.OK);
-	}
+	}*/
 	
-	@RequestMapping(value = "/login", method = RequestMethod.POST, headers = "Accept=application/json")
-	public @ResponseBody
-	ResponseEntity<String> login(@RequestBody String json) {
-		HttpSession session = request.getSession();
-		System.out.println("session in login: " + session);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Content-Type", "application/json");
-		JsonObject credentials = new JsonParser().parse(json).getAsJsonObject();
+	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	@ResponseBody User login(@RequestBody User user_) {
+		/*HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set("Content-Type", "application/json");*/
+		Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
+				user_.getNickName(), user_.getPassword());
+		System.out.println(user_);
+		/*JsonObject credentials = new JsonParser().parse(json).getAsJsonObject();
 		Authentication authenticationToken = new UsernamePasswordAuthenticationToken(
 				credentials.get("nickName").getAsString(), credentials.get("password").getAsString());
-
+*/
 		try {
 			Authentication authentication = authenticationManager
 					.authenticate(authenticationToken);
 			SecurityContextHolder.getContext()
 					.setAuthentication(authentication);
 			System.out.println("authenticated");
-			System.out.println("user: " + json.toString());
 			
-			User user_ = userDAO.getUserByCredentials(credentials.get("nickName").getAsString(), 
-					credentials.get("password").getAsString());
-			System.out.println("user: " + user_);
-			if (user_ != null) {
+			User user = userDAO.getUserByCredentials(user_.getNickName(), 
+					user_.getPassword());
+			System.out.println("user: " + user);
+			return user;
+			/*if (user_ != null) {
 				return new ResponseEntity<String>(new Gson().toJson(user_, user_.getClass()), responseHeaders,
 						HttpStatus.OK);
 			} else {
 				return new ResponseEntity<String>("{user : \"fail\"}", responseHeaders, 
 											HttpStatus.OK);
-			}
+			}*/
 		} catch (AuthenticationException ex) {
 			System.out.println("not authenticated");
-			return new ResponseEntity<String>("{user : \"failed\"}", responseHeaders, 
-					HttpStatus.OK);
+			return null;//new ResponseEntity<String>("{user : \"failed\"}", responseHeaders, 
+					//HttpStatus.OK);
 		}
 	}
 	

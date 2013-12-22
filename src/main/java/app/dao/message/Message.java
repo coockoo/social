@@ -4,20 +4,35 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+
 import app.dao.group.Group;
 import app.dao.user.User;
 
-
+@Entity
 public class Message {
-    private Integer messageID = null;
-    private User user = null;
-    private Group group = null;
+	
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer messagesID = null;
+	
+    private transient User user = null;
+	
+    private transient Group group = null;
+	
     private String messageText = null;
     private Date messageDate = null;
     private Integer likes = 0;
     private Integer dislikes = 0;
     
-    public Message() {
+    /*public Message() {
         
     }
     
@@ -27,16 +42,18 @@ public class Message {
         this.messageDate = messageDate;
         this.user = user;
         this.group = group;
-    }
+    }*/
     
     public Integer getMessageID() {
-        return messageID;
+        return messagesID;
     }
     
     public void setMessageID(Integer messageID) {
-        this.messageID = messageID;
+        this.messagesID = messageID;
     }
     
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "userID")
     public User getUser() {
         return user;
     }
@@ -45,6 +62,8 @@ public class Message {
         this.user = user;
     }
     
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "groupID")
     public Group getGroup() {
         return group;
     }

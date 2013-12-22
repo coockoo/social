@@ -3,8 +3,8 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
  
-	<bean id="userDAO" class="app.dao.user.UserDAOMySQL">
-		<property name="dataSource" ref="dataSource" />
+	<bean id="userDAO" class="app.dao.user.UserDAOJPA">
+		
 	</bean>
  
 </beans>

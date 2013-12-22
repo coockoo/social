@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -28,7 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import app.UserSession;
+import app.dao.group.Group;
 import app.dao.user.User;
 import app.dao.user.UserDAO;
 
@@ -37,7 +38,6 @@ import app.dao.user.UserDAO;
 public class UserController {
 	private ApplicationContext context = null;
 	private UserDAO userDAO = null;
-	private UserSession session = null;
 	private User byJSON(String json) {
 		JsonParser jsonParser = new JsonParser();
 		JsonObject jo = (JsonObject) jsonParser.parse(json);
@@ -69,19 +69,20 @@ public class UserController {
 	public UserController() {
 		context = new ClassPathXmlApplicationContext("application-context.xml");
 		userDAO = (UserDAO) context.getBean("userDAO");
-		session = (UserSession) context.getBean("userSession");
+		//session = (UserSession) context.getBean("userSession");
 	}
 
 	@RequestMapping(value = "/all", method = RequestMethod.GET)
 	public @ResponseBody
-	ResponseEntity<String> allUsers(HttpServletRequest request) {
+	List<User> allUsers(HttpServletRequest request) {
+		System.out.println("in all");
 		List<User> users = userDAO.getAllUsers();
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
-		System.out.println("Session " + request.getSession(false));
-		
-		return new ResponseEntity<String>(new Gson().toJson(users),
-				responseHeaders, HttpStatus.OK);
+		//System.out.println("Session " + request.getSession(false));
+		return users;
+		//return new ResponseEntity<String>(new Gson().toJson(users),
+				//responseHeaders, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/error")
@@ -92,11 +93,12 @@ public class UserController {
 		return new ResponseEntity<String>("error", responseHeaders, HttpStatus.OK);
 	}
 
-/*	@RequestMapping(value = "/{id}", method = RequestMethod.GET, headers = "Accept=application/json")
+	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public @ResponseBody
-	ResponseEntity<String> showUser(@PathVariable(value = "id") int id, HttpServletRequest request, HttpSession session) {
-		System.out.println("User by id: " + session);
+	User showUser(@PathVariable(value = "id") int id) {
+		
 		SecurityContext securityContext = SecurityContextHolder.getContext();
+		System.out.println("here!");
 	    Authentication authentication = securityContext.getAuthentication();
 	    if (authentication != null) {
 	        Object principal = authentication.getPrincipal();
@@ -107,20 +109,18 @@ public class UserController {
 		User user = userDAO.findUserById(id);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
-		return new ResponseEntity<String>(new Gson().toJson(user),
-				responseHeaders, HttpStatus.OK);
-	}*/
+		return user;
+		//return new ResponseEntity<String>(new Gson().toJson(user),
+				//responseHeaders, HttpStatus.OK);
+	}
 
+	//curl -X POST -H "Content-Type: application/json" -d '{"nickName" : "bertrand1", "password" : "111", "firstName" : "Bert1", "lastName" : "Userdhtern1", "email" : "bert@gmail.com"}' http://localhost:8080/social/api/user/create
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	ResponseEntity<String> createUser(@RequestBody String json, HttpServletRequest request) {
-		User user = byJSON(json);
-		user = userDAO.create(user);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Content-Type", "application/json");
-		//request.getSession().setAttribute("user", user);
-		
-		return new ResponseEntity<String>(new Gson().toJson(user),
-				responseHeaders, HttpStatus.OK);
+	@ResponseBody User createUser(@RequestBody User user) {
+		System.out.println(user.getFirstName() + " : " + user.getLastName() + " : " + user.getUserID());
+		User userRes = userDAO.create(user);
+		System.out.println(userRes.getFirstName() + " : " + userRes.getLastName() + " : " + userRes.getUserID());
+		return userRes;
 	}
 
 	@RequestMapping(value="/{id}", method=RequestMethod.PUT)
@@ -137,23 +137,26 @@ public class UserController {
 	}
 	
 	@RequestMapping(value="/{id}", method=RequestMethod.DELETE)
-	ResponseEntity<String> deleteUser(@PathVariable(value = "id") int id) {
+	void deleteUser(@PathVariable(value = "id") int id) {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
-		return new ResponseEntity<String>("{\"success\": " + userDAO.delete(userDAO.findUserById(id)) + "}", responseHeaders, HttpStatus.OK);
+		User userByID = userDAO.findUserById(id);
+		System.out.println(userByID);
+		userDAO.delete(userByID);
+		//return new ResponseEntity<String>("{\"success\": " + userDAO.delete(userDAO.findUserById(id)) + "}", responseHeaders, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value="/{userID}/enroll/{groupID}", method=RequestMethod.POST)
-	ResponseEntity<String> enrollToGroup(@PathVariable(value = "userID") int userID, @PathVariable(value = "groupID") int groupID) {
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Content-Type", "application/json");
-		return new ResponseEntity<String>("{\"success\": " + userDAO.enrollToGroup(userID, groupID) + "}", responseHeaders, HttpStatus.OK);
+	@ResponseBody void enrollToGroup(@PathVariable(value = "userID") int userID, @PathVariable(value = "groupID") int groupID) {
+		System.out.println("I m here!!!");
+		userDAO.enrollToGroup(userID, groupID);
+		//return new ResponseEntity<String>("{\"success\": " + userDAO.enrollToGroup(userID, groupID) + "}", responseHeaders, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value="/{userID}/groups", method=RequestMethod.GET)
-	ResponseEntity<String> getGroups(@PathVariable(value = "userID") int userID) {
+	public @ResponseBody List<Group> getGroups(@PathVariable(value = "userID") int userID) {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
-		return new ResponseEntity<String>(new Gson().toJson(userDAO.getGroups(userDAO.findUserById(userID))), responseHeaders, HttpStatus.OK);
+		return userDAO.getGroups(userDAO.findUserById(userID));//new ResponseEntity<String>(new Gson().toJson(userDAO.getGroups(userDAO.findUserById(userID))), responseHeaders, HttpStatus.OK);
 	}
 }

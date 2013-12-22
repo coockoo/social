@@ -42,62 +42,64 @@ public class GroupController {
 	
 	@RequestMapping(value = "/all", method = RequestMethod.GET)
 	public @ResponseBody
-	ResponseEntity<String> allGroups() {
+	List<Group> allGroups() {
 		List<Group> groups = null;
 		groups = groupDAO.getAllGroups();
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
-		return new ResponseEntity<String>(new Gson().toJson(groups),
-				responseHeaders, HttpStatus.OK);
+		return groups;
+		//return new ResponseEntity<String>(new Gson().toJson(groups),
+				//responseHeaders, HttpStatus.OK);
 	}	
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.GET)
 	public @ResponseBody
-	ResponseEntity<String> showGroup(@PathVariable(value = "id") int id) {
+	Group showGroup(@PathVariable(value = "id") int id) {
 		Group group = groupDAO.findGroupById(id);
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Content-Type", "application/json");
-		return new ResponseEntity<String>(new Gson().toJson(group),
-				responseHeaders, HttpStatus.OK);
+		return group;
+		//return new ResponseEntity<String>(new Gson().toJson(group),
+				//responseHeaders, HttpStatus.OK);
 	}
 	
 	@RequestMapping(value = "/{groupID}/newmessage/{userID}", method = RequestMethod.POST)
 	public @ResponseBody
-	ResponseEntity<String> addmessage(@PathVariable(value = "groupID") int groupID
-			, @PathVariable(value = "userID") int userID
-			, @RequestBody String messageText) {
-		HttpHeaders responseHeaders = new HttpHeaders();
-		responseHeaders.set("Content-Type", "application/json");
-		System.out.println("text: " + messageText);
-		boolean added = false;
+	void addmessage( @RequestBody Message messageText 
+			, @PathVariable(value = "groupID") int groupID
+			, @PathVariable(value = "userID") int userID// ) {
+			) {
+		System.out.println("Hello from message!");
+		System.out.println(messageText);
 		try {
-			added = messageDAO.addMessage(userID, groupID, messageText);
-			return new ResponseEntity<String>("{\"success\": " + added + "}", responseHeaders, HttpStatus.OK);
+			messageDAO.addMessage(userID, groupID, "HELLO FROM HIBERNATE");
+			//return new ResponseEntity<String>("{\"success\": " + added + "}", responseHeaders, HttpStatus.OK);
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return new ResponseEntity<String>("{\"success\": " + added + "}", responseHeaders, HttpStatus.OK);
+			//return new ResponseEntity<String>("{\"success\": " + added + "}", responseHeaders, HttpStatus.OK);
 		}
 	}
 	
 	@RequestMapping( value = "/{groupID}/messages", method = RequestMethod.GET) 
 	public @ResponseBody
-	ResponseEntity<String> allMessages(@PathVariable(value = "groupID") int groupID) {
+	List<Message> allMessages(@PathVariable(value = "groupID") int groupID) {
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
 		List<Message> messages = messageDAO.getAllMessagesOfGroup(groupID);
-		return new ResponseEntity<String>(new Gson().toJson(messages),
-				responseHeaders, HttpStatus.OK);
+		return messages;
+		//return new ResponseEntity<String>(new Gson().toJson(messages),
+			//	responseHeaders, HttpStatus.OK);
 	}
 	
 	
 	@RequestMapping( value = "/{groupID}/users", method = RequestMethod.GET) 
 	public @ResponseBody
-	ResponseEntity<String> usersOfTheGroup(@PathVariable(value = "groupID") int groupID) {
+	List<User> usersOfTheGroup(@PathVariable(value = "groupID") int groupID) {
+		System.out.println("In users groups");
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.set("Content-Type", "application/json");
 		List<User> users = groupDAO.getUsersOfGroup(groupID);
-		return new ResponseEntity<String>(new Gson().toJson(users),
-				responseHeaders, HttpStatus.OK);
+		return users;
+		//return new ResponseEntity<String>(new Gson().toJson(users),
+				//responseHeaders, HttpStatus.OK);
 	}
 
 }
